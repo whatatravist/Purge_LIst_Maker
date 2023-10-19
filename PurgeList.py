@@ -1,17 +1,30 @@
 import pandas as pd
 from datetime import datetime
 import os
+import tkinter as tk
+from tkinter import filedialog
 
 def main():
-    # Define the paths for input and output
-    input_path = "C:\\Users\\WhatA\\Documents\\Geezeo Monthly Engagement Report\\"
-    output_path = "C:\\Users\\WhatA\\Documents\\Geezeo Monthly Engagement Report\\Output\\"
+    # Set up a root window but keep it hidden
+    root = tk.Tk()
+    root.withdraw()
 
-    # Specify the input file name
-    input_file = "Monthly_Engagement_Report_2023-10-02.xlsx"
+    # Prompt the user to select the input file
+    input_file_path = filedialog.askopenfilename(title="Select the Geezeo Monthly Engagement Report NO CSV", filetypes=[("Excel files", "*.xlsx")])
+    if not input_file_path:
+        print("No input file selected. Exiting.")
+        return
+
+    # Prompt the user to select the output directory
+    output_path = filedialog.askdirectory(title="Select where the xlsx and csv purge files will go")
+    if not output_path:
+        print("No output directory selected. Exiting.")
+        return
+    # Ensure the path ends with a slash
+    output_path += '/' if not output_path.endswith('/') else ''
 
     # Load the Excel document
-    df = pd.read_excel(input_path + input_file, engine='openpyxl')
+    df = pd.read_excel(input_file_path, engine='openpyxl')
 
     # Apply the formula to determine if a user is active
     df['Status'] = df.apply(lambda row: "Yes" if (row['Last Login Date'] >= pd.Timestamp(datetime.now()).to_period('M').to_timestamp() - pd.DateOffset(months=3)) or (row['Budgets'] >= 1) or (row['Alerts'] >= 1) else "No", axis=1)
